@@ -1,7 +1,9 @@
-// src/components/DropDownMenu.jsx
+
+import './ContactModal.css'
+import './SettingsModal.css'
 import React, { useState, useRef, useEffect } from 'react';
 
-const DropDownMenu = ({ onOpenContact }) => {
+const DropDownMenu = ({ onOpenContact, onOpenSettings }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -38,10 +40,19 @@ const DropDownMenu = ({ onOpenContact }) => {
           >
             📇 Contact Book
           </button>
-          <button className="dropdown-item" onClick={() => alert('Settings')}>
+          <button
+            className="dropdown-item"
+            onClick={() => {
+              onOpenSettings?.();
+              setShowDropdown(false);
+            }}
+          >
             ⚙️ Settings
           </button>
-          <button className="dropdown-item text-danger" onClick={() => alert('Logged out')}>
+          <button
+            className="dropdown-item text-danger"
+            onClick={() => alert('Logged out')}
+          >
             🔓 Logout
           </button>
         </div>

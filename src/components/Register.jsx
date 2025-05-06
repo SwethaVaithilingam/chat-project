@@ -41,12 +41,10 @@ const Register = () => {
 
     try {
       const response = await axios.post('http://localhost:8000/register', {
-        name: formData.username,
-        phone_number: formData.phone,
+        username: formData.username,
+        phone: formData.phone,
         email: formData.email,
-        password: formData.password,
-        confirm_password: formData.confirmPassword,
-
+        password: formData.password
       });
 
       setMessage(`✅ ${response.data.message}`);

@@ -7,8 +7,7 @@ import SearchBar from './components/SearchBar';
 import AudioRecorder from './components/AudioRecorder';
 import DropDownMenu from './components/DropDownMenu';
 import ContactModal from './components/ContactModal';
-
-
+import SettingsModal from './components/SettingsModal';
 
 const initialMessages = {
   1: [{ text: 'Hello Alice!', sender: 'me' }, { text: 'Hey there!', sender: 'them' }],
@@ -27,7 +26,50 @@ export default function App() {
   const [input, setInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showContactModal, setShowContactModal] = useState(false);
- 
+  const [showSettings, setShowSettings] = useState(false);
+  const [showTranslateIcons, setShowTranslateIcons] = useState(false);
+const [isTranslating, setIsTranslating] = useState(false);
+const [shouldTranslate, setShouldTranslate] = useState(false); // default false
+
+  const [settings, setSettings] = useState({
+    sendingLang: 'English',
+    receivingLang: 'English',
+    chatFormat: 'Text Mode',
+  });
+  const handleTranslate = async () => {
+    if (!input.trim()) return;
+    setIsTranslating(true);
+  
+    try {
+      const response = await fetch('http://localhost:8000/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: input,
+          fromLang: settings.sendingLang,
+          toLang: settings.receivingLang
+        })
+      });
+  
+      const data = await response.json();
+      setInput(data.translatedText || ''); // backend should return translatedText
+    } catch (error) {
+      console.error('Translation failed:', error);
+    } finally {
+      setIsTranslating(false);
+      setShowTranslateIcons(false);
+    }
+  };
+  
+  const handleCancelTranslate = () => {
+    setShowTranslateIcons(false);
+  };
+  
+  const handleSettingsSave = (updatedSettings) => {
+    setSettings(updatedSettings);
+    console.log('Updated Settings:', updatedSettings);
+  };
+
   const handleAddContact = (newContact) => {
     const newId = Math.max(...contacts.map(c => c.id)) + 1;
     const updated = [...contacts, { ...newContact, id: newId, lastMessage: '' }];
@@ -63,7 +105,11 @@ export default function App() {
           {/* <h4 className="p-3 border-bottom">Chats</h4> */}
           <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
             <h4 className="mb-0">Chats</h4>
-            <DropDownMenu onOpenContact={() => setShowContactModal(true)} />
+            <DropDownMenu
+              onOpenContact={() => setShowContactModal(true)}
+              onOpenSettings={() => setShowSettings(true)}
+            />
+
             {/* <ContactModal
               show={showContactModal}
               onClose={() => setShowContactModal(false)}
@@ -76,6 +122,12 @@ export default function App() {
               onEditContact={handleEditContact}
               onDeleteContact={handleDeleteContact}
               contacts={contacts}
+            />
+            <SettingsModal
+              show={showSettings}
+              onClose={() => setShowSettings(false)}
+              settings={settings}
+              onSave={handleSettingsSave}
             />
 
           </div>
@@ -137,14 +189,33 @@ export default function App() {
               setMessages({ ...messages, [selectedContact.id]: updated });
             }} />
 
-            <input
+            {/* <input
               type="text"
               className="form-control me-2"
               placeholder="Type a message"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              // onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (!showTranslateIcons) setShowTranslateIcons(true);
+              }}
+              
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            />
+            /> */}
+
+<input
+  type="text"
+  className="form-control me-2"
+  placeholder="Type a message"
+  value={input}
+  onChange={(e) => {
+    setInput(e.target.value);
+    if (!showTranslateIcons) setShowTranslateIcons(true);
+  }}
+  disabled={isTranslating}
+/>
+
+
             <LanguageSelector />
 
             <AudioRecorder
@@ -158,9 +229,29 @@ export default function App() {
               }}
             />
 
-            <button className="btn btn-success" onClick={sendMessage}>
+{showTranslateIcons && !isTranslating && (
+  <div className="d-flex align-items-center me-2">
+    <i className="bi bi-check-circle text-success me-1" style={{ cursor: 'pointer' }} onClick={handleTranslate}></i>
+    <i className="bi bi-x-circle text-danger" style={{ cursor: 'pointer' }} onClick={handleCancelTranslate}></i>
+  </div>
+)}
+
+{isTranslating ? (
+  <button className="btn btn-secondary" disabled>
+    <span className="spinner-border spinner-border-sm"></span>
+  </button>
+) : (
+  <button className="btn btn-success" onClick={sendMessage}>
+    <i className="bi bi-send"></i>
+  </button>
+)}
+
+            {/* <button className="btn btn-success" onClick={sendMessage}>
               <i className="bi bi-send"></i>
-            </button>
+            </button> */}
+
+
+
 
           </div>
         </div>
