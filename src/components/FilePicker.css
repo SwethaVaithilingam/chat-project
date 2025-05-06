@@ -1,0 +1,13 @@
+.filepicker-icon {
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+    border: 1px solid #ced4da;
+    color: #212529;
+  }
+  
